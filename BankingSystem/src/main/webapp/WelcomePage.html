@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style>
+        .container{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            
+            
+        }
+        .form_container{
+            box-shadow: 0 4px 15px 0 rgba(0, 0, 0,0.2);
+            padding: 10%;
+            /* border: 2px solid white; */
+            border-radius:15px ;
+            position: relative
+      
+        }
+        .heading{
+            margin-top: -10%;
+        }
+        .form-section{
+            display: flex;
+            justify-content: center;
+        }
+        #afterregbut {
+        	position: absolute;
+       		bottom: 10px;
+       		right: 10px;
+       		
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.js"></script> 
+    <title>XYZ BANK</title>
+</head>
+<body>
+  
+    
+    <div class ='container'>
+       
+        <div class="form_container">
+            <h1 class="heading">Welcome to XYZ Bank</h1>
+            <div class="form-section">
+            <form id ='form1' >
+                <br>
+                <label for="text">Name: </label><br>
+                <input id="namer" type="text" name="name" required><br>
+                <label  for="email">Email-Id:</label><br>
+                <input id="emailr" type="email" name = "emailId" required><br>
+                <small id ="existingUser" style="color: red;">Email-Id already Present<br></small>
+                <label for="password">Password:</label><br>
+                <input id="passwordr" type ="password" name= "password" ><br>
+                <small id="passwordinvalid">Password should contain minimum 8 characters, atleast one uppercase,special character and a digit.<br></small>
+
+                <label for="password">Confirm Password:</label><br>
+                <input id="passwordcheck" type ="password" name= "password" required><br>
+                <small id="passcheck" style="color: red;">
+                    **Password didn't match
+                </small>
+                <br>
+                 
+                <input type="submit" id="registerButton" value="Register">
+                <p >Already Registered <b id="login" >Log In</b></p>
+            </form>
+            
+            <p id="afterreg"></p>
+            <button id = "afterregbut" type="button" style="width:60px;height:30px">SignIn</button>
+            
+            
+             <form id ='form2'>
+                <br>
+                <label for="text">Customer ID:</label><br>
+                <input type="text" name="customerID" id="customerId" value="" placeholder=""><br>
+                <label for="password">Password:</label><br>
+                <input type="password" name="password" id="password" value=""><br>
+                <br>
+                <small id ="invaliduser" style="color: red;">Invalid username or password</small><br>
+                <input type="submit" id="loginButton" value="Login">
+                <p >New User <b id="register" >Register</b></p>
+            </form>
+        </div>
+        </div>
+    </div>
+    <script>
+        $(document).ready(function(){
+        	
+        	
+            $('#form1').hide()
+            $('#afterreg').hide()
+        
+            $('#afterregbut').hide()
+            
+            
+            $('#register').click(function(){
+                 $('#form2').hide();
+                 $('#form1').show();
+             
+            })
+            $('#login').click(function(){
+                 $('#form1').hide();
+                 $('#form2').show();
+             
+            })
+            
+            $('#existingUser').hide();
+            $('#invaliduser').hide();
+            $('#passwordinvalid').hide();
+            $('#passcheck').hide();
+           
+            $('#register').css({'cursor': 'pointer'});
+            $('#login').css({'cursor': 'pointer'});
+
+            $('#form1').submit(function(e){
+
+                e.preventDefault()
+                let name =$('input#namer').val();
+                let email= $('input#emailr').val();
+                let password=$('input#passwordr').val();
+                let passwordCheck=$('input#passwordcheck').val();
+
+                let validPassword=true//validatePassword(password);
+                let comparePassword = true;
+                if(password!=passwordCheck) comparePassword=false;
+                
+                //console.log(comparePassword+'');
+              
+
+                if(!validPassword){
+                	$('#passwordinvalid').show();
+                }
+                else{
+                	$('#passwordinvalid').hide(); 
+                }
+
+                if(!comparePassword){
+                    $('#passcheck').show();
+                    $('input#passwordcheck').val('');
+                }else{
+                    $('#passcheck').hide();
+                }
+
+                if(validPassword&&comparePassword){
+                	
+                	$.ajax({
+            			
+            			method:"POST",
+            			url:"Register",
+            			data:JSON.stringify({"name":name,"email":email,"password":password}),
+            		
+            			//we are expecting a json data in response from a server
+            			dataType:"json",
+        
+            		}).done(function(data){
+            			if(data.check=="1"){
+            				$('#existingUser').hide()
+            				$('#afterreg').show()
+                			$('#form1').hide()
+                			//console.log(data)
+                			$('#afterreg').html("Name:"+data.name +"<br>Email-Id:"+data.emailId+"<br>Your Customer ID:"+data.id+"<br>Your Account Number:"+data.accountNumber );
+                			$('#afterregbut').show()
+            			}
+            			else{
+            				$('#existingUser').show()
+            			}
+            			
+            			//alert("success")
+            		})
+                }
+       
+                //console.log(name+' '+email+' '+password+' '+passwordCheck+'');
+            })
+            
+            
+            $('#afterregbut').click(function(){
+            		$("#form1").trigger('reset');
+                	$('#afterreg').hide()
+                	$('#form2').show()
+                	$('#afterregbut').hide()
+                })
+                
+                
+              $('#form2').submit(function(e){
+            	  
+            	 e.preventDefault()
+            	 
+            	 let id =$('input#customerId').val();
+            	 let password =$('input#password').val();
+            	 
+            	 
+            	 $.ajax({
+         			
+         			method:"POST",
+         			url:"Login",
+         			data:JSON.stringify({"id":id,"password":password}),
+         			dataType:"json",
+         	
+         		}).done(function(data){
+         			console.log(data)
+         			if(data.check == "1"){
+         				$('#invaliduser').hide()
+         				window.location.href="http://localhost:8080/BankingSystem/welcome.jsp"
+         			}
+         			else{
+         				$('#invaliduser').show()
+         			}
+         		})
+            	 
+            	 
+              })
+
+            function validatePassword(password){
+                var regex= '^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&-+=()])(?=\\S+$).{8,20}$';
+                if(password.match(regex)) return true;
+                else return false;
+            }
+            
+        })
+    </script>
+    
+</body>
+</html>
